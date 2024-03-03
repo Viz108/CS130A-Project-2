@@ -1,129 +1,164 @@
 #include <iostream>
 #include <time.h>
 #include <math.h>
-#include <fstream> 
-#include <set> 
+#include <fstream>
+#include <set>
 
 using namespace std; 
 
-int h1(int s, int x, int m)
-{
-    //s is the randomly generated seed
-    //x is the key to be hashed
+//Global variables
+int N = 2000000; //Size of universe
+int m = 1000; //Size of table
+int k = 100; //Number of hash functions    
+int a = 500; //Number of inputs to test
 
-    srand(s + x); 
-    return rand() % (m); 
+
+int h1(int x, int s) //x is the value, s is the seed
+{
+    srand(x + s); 
+    return rand() % m; 
 }
 
-int h2(int p, int x, int m)
+int h2(int x, int p) //x is the value, p is the prime
 {
-    //p is the random prime
-    //x is the key to be hashed
-
-    int a = rand() % (p-1) + 1; 
-    int b = rand() % (p-1) + 1; 
-    return ((a*x + b) % p) % m; 
+    //NOTE: long long is used here to avoid overflow and wraparound in return calculation
+    long long a = (((rand() % 10)*(pow(10,7)))+((rand() % 10)*(pow(10,6)))+((rand() % 10)*(pow(10,5)))+((rand() % 10)*(pow(10,4)))+((rand() % 10)*(pow(10,3)))+((rand() % 10)*(pow(10,2)))+((rand() % 10)*(pow(10,1)))+((rand() % 10)*(pow(10,0)))); 
+    long long b = (((rand() % 10)*(pow(10,7)))+((rand() % 10)*(pow(10,6)))+((rand() % 10)*(pow(10,5)))+((rand() % 10)*(pow(10,4)))+((rand() % 10)*(pow(10,3)))+((rand() % 10)*(pow(10,2)))+((rand() % 10)*(pow(10,1)))+((rand() % 10)*(pow(10,0)))); 
+    a = a % p; 
+    b = b % p; 
+    return (((a*x)+b) % p) % m; 
 }
+
+
 
 main()
 {
-    srand(time(NULL));
-    //generate data
-    int k = 100; //Number of values
-    int m = 200; //Size of hash table
-    int data[k]; 
-    // for(int i = 0; i < k; i++)
-    // {
-    //     data[i] = rand(); 
-    // }
-    //in order
-    // for(int i = 0; i < k; i++)
-    // {
-    //     data[i] = i; 
-    // }
-    //only odd
-    for(int i = 0; i < k; i++)
+    //Seed srand with current time for generating random values 
+    srand(time(NULL)); 
+
+    //Generate random inputs for testing
+    //NOTE: due to limitations of rand(), max value will be around 32000 from just rand()
+    int inputs[a]; 
+
+    cout << "Select input data set (1 - fully random, 2 - first 500, 3 - odd only)" << endl; 
+    int dataGenType; 
+    cin >> dataGenType; 
+
+    if(dataGenType == 1)
     {
-        data[i] = (2*rand())+1; 
+        for(int i = 0; i < a; i++)
+        {
+            int newInput = (((rand() % 10)*(pow(10,7)))+((rand() % 10)*(pow(10,6)))+((rand() % 10)*(pow(10,5)))+((rand() % 10)*(pow(10,4)))+((rand() % 10)*(pow(10,3)))+((rand() % 10)*(pow(10,2)))+((rand() % 10)*(pow(10,1)))+((rand() % 10)*(pow(10,0)))); //Need to generate each digit randomly since rand caps at 32000
+            newInput = newInput % N; 
+            inputs[i] = newInput; 
+        }
+    }
+    else if(dataGenType == 2)
+    {
+        for(int i = 0; i < a; i++)
+        {
+            inputs[i] = i; 
+        }
+    }
+    else if(dataGenType == 3)
+    {
+        for(int i = 0; i < a; i++)
+        {
+            int newInput = (((rand() % 10)*(pow(10,7)))+((rand() % 10)*(pow(10,6)))+((rand() % 10)*(pow(10,5)))+((rand() % 10)*(pow(10,4)))+((rand() % 10)*(pow(10,3)))+((rand() % 10)*(pow(10,2)))+((rand() % 10)*(pow(10,1)))+((rand() % 10)*(pow(10,0)))); //Need to generate each digit randomly since rand caps at 32000
+            newInput = newInput % N; 
+            newInput = (2*newInput)+1; 
+            inputs[i] = newInput; 
+        }
     }
 
-    //hash function 1
+    
 
-    //initialize s values
-    int seeds[k]; 
+    //h1 setup
+    //Generate k seeds for k functions
+    int s[k]; //Seeds for h1
     for(int i = 0; i < k; i++)
     {
-        seeds[i] = rand(); 
+        s[i] = rand(); 
     }
 
-    //hash values
-    int h1Results[k]; 
-    for(int i = 0; i < k; i++)
+    //h2 setup 
+    //Pick a prime greater than N
+    int primeSeed = rand(); 
+    while(pow(2,primeSeed) < N + 1)
     {
-        h1Results[i] = h1(seeds[i], data[i], m); 
+        primeSeed = rand(); 
     }
+    int p = pow(2,primeSeed) - 1;
 
+    //Testing
+    int testingFunction; 
 
-    //hash function 2
-
-    //Choose prime
-    int p = pow(2, rand()) - 1; 
-
-    //hash values
-    int h2Results[k]; 
-    for(int i = 0; i < k; i++)
-    {
-        h2Results[i] = h2(p, data[i], m);
-    }
-
-    //Print results 
-    // cout << "Results: " << endl; 
-    // cout << "Input    h1    h2" << endl; 
-    // for(int i = 0; i < k; i++)
-    // {
-    //     cout << data[i] << "    " << h1Results[i] << "    " << h2Results[i] << endl; 
-    // }
-
-    //Save to csv
+    //Setup output
     ofstream output; 
 
     output.open("data" + to_string(time(NULL)) + ".csv"); 
-    output << "data, h1, h2" << endl; 
-    for(int i = 0; i < k; i++)
-    {
-        output << data[i] << "," << h1Results[i] << "," << h2Results[i] << endl; 
-    }
-    output.close();
+    output << "input,"; 
 
-    //Check number of collisions
-    int h1Collisions = 0; 
-    int h2Collisions = 0; 
-    set<int> alreadyVisitedh1;
-    set<int> alreadyVisitedh2; 
-    for(int i = 0; i < k; i++)
+    //Pick hash function to test
+
+    cout << "Select hash function (1 or 2): " << endl; 
+    cin >> testingFunction; 
+
+    if(testingFunction == 1)
     {
-        for(int j = i+1; j < k; j++)
+        for(int i = 0; i < k; i++)
         {
-            if(alreadyVisitedh1.find(h1Results[i]) == alreadyVisitedh1.end())
-            {
-                if(h1Results[i] == h1Results[j])
-                {
-                    h1Collisions++; 
-                }
-            }
-            if(alreadyVisitedh2.find(h2Results[i]) == alreadyVisitedh2.end())
-            {
-                if(h2Results[i] == h2Results[j])
-                {
-                    h2Collisions++; 
-                }
-            }
+            output << "h1_" << i << ","; 
         }
-        alreadyVisitedh1.emplace(h1Results[i]); 
-        alreadyVisitedh2.emplace(h2Results[i]); 
-    } 
+        output << endl; 
 
-    cout << "h1 Collisions: " << h1Collisions << endl; 
-    cout << "h2 Collisions: " << h2Collisions << endl; 
+        //Generate k hash functions and hash the current value, output resulting indexes
+        for(int i = 0; i < a; i++)
+        {
+            output << inputs[i] << ","; 
+
+            int currHashes[k];
+            for(int j = 0; j < k; j++)
+            {
+                currHashes[j] = h1(inputs[i], s[j]); 
+            }
+
+            for(int j = 0; j < k; j++)
+            {
+                output << currHashes[j] << ","; 
+            }
+            output << endl; 
+        }
+    }
+    else if(testingFunction == 2)
+    {
+        for(int i = 0; i < k; i++)
+        {
+            output << "h2_" << i << ","; 
+        }
+        output << endl; 
+
+        //Generate k hash functions and hash the current value, output resulting indexes
+        for(int i = 0; i < a; i++)
+        {
+            output << inputs[i] << ","; 
+
+            int currHashes[k];
+            for(int j = 0; j < k; j++)
+            {
+                currHashes[j] = h2(inputs[i], p); 
+            }
+
+            for(int j = 0; j < k; j++)
+            {
+                output << currHashes[j] << ","; 
+            }
+            output << endl; 
+        }
+    }
+    else
+    {
+        cout << "Invalid input" << endl; 
+    }
 
 }
