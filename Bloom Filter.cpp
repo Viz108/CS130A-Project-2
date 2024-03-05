@@ -162,22 +162,22 @@ main()
     
 
     
-    // for(int i = 0; i < n; i++)
-    // {
-    //     srand(time(NULL)); 
-    //     //int newValue = (((rand() % 10)*(pow(10,7)))+((rand() % 10)*(pow(10,6)))+((rand() % 10)*(pow(10,5)))+((rand() % 10)*(pow(10,4)))+((rand() % 10)*(pow(10,3)))+((rand() % 10)*(pow(10,2)))+((rand() % 10)*(pow(10,1)))+((rand() % 10)*(pow(10,0)))); 
-    //     int newValue = rand(); 
-
-    //     analysisFilter.add(newValue); 
-    //     addedValues.push_back(newValue); 
-    // }
-
     for(int i = 0; i < n; i++)
     {
+        srand(time(NULL)); 
+        int newValue = (((rand() % 10)*(pow(10,7)))+((rand() % 10)*(pow(10,6)))+((rand() % 10)*(pow(10,5)))+((rand() % 10)*(pow(10,4)))+((rand() % 10)*(pow(10,3)))+((rand() % 10)*(pow(10,2)))+((rand() % 10)*(pow(10,1)))+((rand() % 10)*(pow(10,0)))); 
         //int newValue = rand(); 
-        analysisFilter.add(i); 
-        addedValues.push_back(i); 
+
+        analysisFilter.add(newValue); 
+        addedValues.push_back(newValue); 
     }
+
+    // for(int i = 0; i < n; i++)
+    // {
+    //     //int newValue = rand(); 
+    //     analysisFilter.add(i); 
+    //     addedValues.push_back(i); 
+    // }
 
 
     int searched = 0;
@@ -185,27 +185,29 @@ main()
     {
         //int searchValue = (((rand() % 10)*(pow(10,7)))+((rand() % 10)*(pow(10,6)))+((rand() % 10)*(pow(10,5)))+((rand() % 10)*(pow(10,4)))+((rand() % 10)*(pow(10,3)))+((rand() % 10)*(pow(10,2)))+((rand() % 10)*(pow(10,1)))+((rand() % 10)*(pow(10,0)))); 
    
-        srand(time(NULL)); 
-        int searchValue = rand(); 
+        //srand(time(NULL)); 
+        //int searchValue = rand(); 
+        int searchValue = (((rand() % 10)*(pow(10,7)))+((rand() % 10)*(pow(10,6)))+((rand() % 10)*(pow(10,5)))+((rand() % 10)*(pow(10,4)))+((rand() % 10)*(pow(10,3)))+((rand() % 10)*(pow(10,2)))+((rand() % 10)*(pow(10,1)))+((rand() % 10)*(pow(10,0)))); 
+
         if(analysisFilter.contains(searchValue))
         {
-            // searched++; 
-            // bool valueAdded = false; 
-            // for(int i = 0; i < n; i++)
-            // {
-            //     if(addedValues[i] == searchValue)
-            //     {
-            //         valueAdded = true; 
-            //     }
-            // }
-            // if(!valueAdded)
-            // {
-            //     falsePositives++; 
-            // }
-            if(searchValue < n)
+            searched++; 
+            bool valueAdded = false; 
+            for(int i = 0; i < n; i++)
+            {
+                if(addedValues[i] == searchValue)
+                {
+                    valueAdded = true; 
+                }
+            }
+            if(!valueAdded)
             {
                 falsePositives++; 
             }
+            // if(searchValue < n)
+            // {
+            //     falsePositives++; 
+            // }
         }
     }
 
@@ -213,14 +215,16 @@ main()
     cout << "Values that triggered search: " << searched << endl; 
 
     int sanityCheck = 0; 
+    int sanityCheck2 = 0; 
     for(int i = 0; i < addedValues.size(); i++)
     {
+        bool valueAdded; 
         if(analysisFilter.contains(addedValues.at(i)))
         {
             sanityCheck++; 
         }
     }
-    cout << "Sanity check " << sanityCheck << endl; 
+    cout << "Sanity check " << sanityCheck << endl;
     // ofstream output; 
     // output.open("hash_table_" + to_string(time(NULL)) + ".csv"); 
     // for(int i = 0; i < analysisFilter.hashTable.size(); i++)
