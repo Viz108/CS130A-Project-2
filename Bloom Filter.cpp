@@ -8,7 +8,7 @@ using namespace std;
 
 //Global variables
 int N = 2000000; //Size of universe
-const int k = 2; //Number of hash functions    
+const int k = 200; //Number of hash functions    
 int n = 1000; //Number of entries
 int c = 3; 
 int s[k]; //Seeds for h1
